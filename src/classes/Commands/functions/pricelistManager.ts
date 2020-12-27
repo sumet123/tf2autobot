@@ -201,7 +201,10 @@ export function updateCommand(steamID: SteamID, message: string, bot: Bot): void
             newPricelist = targetedPricelist;
 
             if (typeof params.buy === 'object' || typeof params.sell === 'object') {
-                if (new Currencies(params.buy) >= new Currencies(params.sell)) {
+                if (
+                    (new Currencies(params.buy) >= new Currencies(params.sell) && params.sku !== '5021;6') ||
+                    (new Currencies(params.buy) > new Currencies(params.sell) && params.sku === '5021;6')
+                ) {
                     bot.sendMessage(steamID, `❌ Buying price can't be higher than selling price.`);
                     return;
                 } else if (
