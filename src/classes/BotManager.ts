@@ -15,6 +15,8 @@ const REQUIRED_OPTS = ['STEAM_ACCOUNT_NAME', 'STEAM_PASSWORD', 'STEAM_SHARED_SEC
 export default class BotManager {
     private readonly socket: SocketIOClient.Socket;
 
+    private readonly mySocket: SocketIOClient.Socket;
+
     private readonly schemaManager: SchemaManager;
 
     private bot: Bot = null;
@@ -57,6 +59,27 @@ export default class BotManager {
                 this.socket.connect();
             }
         });
+
+        this.mySocket = io('http://localhost:3030', {
+            forceNew: true,
+            autoConnect: true
+        });
+
+        this.mySocket.on('connect', () => {
+            log.debug('Connected to custom autoprice socket server');
+        });
+
+        this.mySocket.on('disconnect', (reason: string) => {
+            log.debug('Disconnected from custom autoprice socket server', { reason: reason });
+
+            if (reason === 'io server disconnect') {
+                this.mySocket.connect();
+            }
+        });
+
+        this.mySocket.on('connect_error', (reason: string) => {
+            log.warn('Cannot connect custom autoprice socket server', { reason: reason });
+        });
     }
 
     getSchema(): SchemaManager.Schema | null {
@@ -65,6 +88,10 @@ export default class BotManager {
 
     getSocket(): SocketIOClient.Socket {
         return this.socket;
+    }
+
+    getMySocket(): SocketIOClient.Socket {
+        return this.mySocket;
     }
 
     isStopping(): boolean {

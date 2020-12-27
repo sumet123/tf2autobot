@@ -33,6 +33,8 @@ import log from '../lib/logger';
 import { isBanned } from '../lib/bans';
 import Options from './Options';
 
+import CustomAutoprice from './CustomAutoprice';
+
 export default class Bot {
     // Modules and classes
     readonly botManager: BotManager;
@@ -40,6 +42,8 @@ export default class Bot {
     readonly schema: SchemaManager.Schema;
 
     readonly socket: SocketIOClient.Socket;
+
+    readonly mySocket: SocketIOClient.Socket;
 
     readonly bptf: BptfLogin;
 
@@ -69,6 +73,8 @@ export default class Bot {
 
     readonly pricelist: Pricelist;
 
+    readonly customAutoprice: CustomAutoprice;
+
     // Settings
     private readonly maxLoginAttemptsWithinPeriod: number = 3;
 
@@ -94,6 +100,7 @@ export default class Bot {
 
         this.schema = this.botManager.getSchema();
         this.socket = this.botManager.getSocket();
+        this.mySocket = this.botManager.getMySocket();
 
         this.client = new SteamUser();
         this.community = new SteamCommunity();
@@ -125,6 +132,8 @@ export default class Bot {
 
         this.pricelist = new Pricelist(this.schema, this.socket, this.options);
         this.inventoryManager = new InventoryManager(this.pricelist);
+
+        this.customAutoprice = new CustomAutoprice(this);
 
         this.admins = this.options.admins.map(steamID => new SteamID(steamID));
 
